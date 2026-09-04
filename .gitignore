@@ -1,0 +1,23 @@
+# Data (Kaggle competition data + community OOF libraries — not redistributed)
+data/
+
+# Large generated artifacts
+nn_cache/
+sub/
+logs/
+catboost_info/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Local tool config
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
