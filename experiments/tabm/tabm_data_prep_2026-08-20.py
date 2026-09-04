@@ -18,7 +18,7 @@ import lightgbm as lgb
 
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import DATA, NN_CACHE as CACHE_DIR
+from src.config import DATA, NN_CACHE as CACHE_DIR
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()

@@ -14,7 +14,7 @@ from sklearn.metrics import roc_auc_score
 
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import NN_CACHE as CACHE_DIR, SUB
+from src.config import NN_CACHE as CACHE_DIR, SUB
 
 y = np.load(f'{CACHE_DIR}/resnet_prepped.npz')['y']
 gbdt_oof = np.load(f'{CACHE_DIR}/gbdt_abd_origfeat_oof.npy')

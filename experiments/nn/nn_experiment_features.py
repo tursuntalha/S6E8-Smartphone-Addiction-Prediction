@@ -12,7 +12,7 @@ from nn_common import LookupTransformerNet, LookupDataset, train_model, device
 
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import NN_CACHE as CACHE_DIR
+from src.config import NN_CACHE as CACHE_DIR
 data = np.load(f'{CACHE_DIR}/prepped_extended.npz')
 
 tr_idx, va_idx = data['tr_idx'], data['va_idx']

@@ -1,9 +1,78 @@
 # Experiments
 
-Everything here was tried and did **not** make it into the final pipeline (`src/`) —
-either it was neutral/negative, or a later script in `src/` superseded it. Each entry
-below states what was tried and what it returned, so the outcome is visible without
-having to read the script.
+`src/` is kept to a small, clean, runnable pipeline (`config.py`, `utils.py`,
+`features.py`, `model_gbdt.py`, `model_nn.py`, `main.py`) implementing the approach
+described in the main README. Everything else — analysis/diagnostic scripts, one-time
+hyperparameter search, and every rejected or superseded modeling idea — lives here
+instead, organized by what kind of thing it is:
+
+- **`eda/`** and **`tuning/`** aren't "rejected" — they're one-off setup/diagnostic work
+  (data analysis, Optuna hyperparameter search) that doesn't need to run every time the
+  pipeline does. Their outputs are already where they need to be: EDA's findings are in
+  `notebooks/01_eda.ipynb` and the main README, and tuning's outputs are the JSON files
+  in `configs/`.
+- **`stacking/`** is the final leaderboard push: a further ensembling step, on top of
+  the GBDT+NN blend `src/main.py` produces, that stacks in several community-shared OOF
+  (out-of-fold) prediction libraries. It's kept separate from `src/` because it depends
+  on external datasets not included in this repo and was iterated on rapidly (many
+  near-duplicate scripts) rather than kept clean — see its own section below.
+- **`gbdt_fe/`**, **`nn/`**, **`resnet/`**, **`tabm/`**, **`early_k1/`** are genuinely
+  rejected or superseded modeling ideas. Each entry below states what was tried and what
+  it returned, so the outcome is visible without having to read the script.
+
+## `eda/` — data analysis and generator reverse-engineering
+
+Diagnostic scripts behind the findings in `notebooks/01_eda.ipynb` and the main
+README's "Approach": **`eda_generator_grid_monotonic.py`** and
+**`eda_generator_lookup_interaction.py`** (reverse-engineering the synthetic
+generator's per-column value patterns and its hard decision rule),
+**`eda_dist_shift_psi.py`** (train/test population-stability check, PSI = 0),
+**`eda_imputability_r2.py`** (how predictable each column is from the others — informed
+the model-based imputation feature), and **`eda_te_smoothing_sweep.py`** /
+**`te_diag_default_vs_tuned.py`** / **`te_smoothing_model_sweep.py`** /
+**`te_smoothing_sweep_v2.py`** (target-encoding smoothing parameter sweeps that settled
+on `SMOOTH=3.0`, used in `src/features.py`).
+
+## `tuning/` — hyperparameter search
+
+**`tune_lgbm.py`**, **`tune_xgb.py`**, **`tune_cat.py`** — independent Optuna searches
+for LightGBM/XGBoost/CatBoost on the raw+TE feature set; their output is what's cached
+in `configs/best_params_{lgbm,xgb,cat}.json` and loaded by `src/features.load_best_params()`.
+**`tune_lgbm_raw_te.py`** is an earlier LightGBM-only search superseded by `tune_lgbm.py`.
+Independently tuning XGBoost/CatBoost (rather than reusing LightGBM's params) was worth
+about +0.00017 on the leaderboard.
+
+## `stacking/` — the community-OOF-library leaderboard push
+
+Starting from the GBDT+NN blend (`src/main.py`, OOF≈0.9691, LB=0.97035), the final
+session pooled ~100 out-of-fold prediction vectors — the project's own GBDT and NN, plus
+several other competitors' publicly-shared OOF libraries — and searched several 2nd-level
+combination strategies on top, all validated with honest 5-fold meta-CV (never fit on
+the same rows a member's own OOF came from):
+
+- **`blend_gbdt_nn_*.py`**, **`blend_4model_stack_k1.py`** — earlier (day 1-3) 2-model
+  and 4-model blend/stack iterations, superseded by the ones below.
+- **`stack_data_2026-08-30.py`** (+ the accidental duplicate `stack_data_2026_08_30.py`)
+  — the shared OOF-library loader (74 external members + this project's own 2).
+- **`stack_explore_2026-08-30.py`**, **`stack_expand_2026-08-30.py`**,
+  **`stack_expand_variants_2026-08-30.py`**, **`stack_variants_2026-08-30.py`**,
+  **`stack_run_variant_2026-08-30.py`**, **`stack_mkn_2026-08-30.py`**,
+  **`stack_impute_variants_2026-08-30.py`**, **`stack_fe_meta_2026-08-30.py`**,
+  **`stack_metas_2026-08-30.py`**, **`stack_bandfix_2026-08-30.py`** — the search over
+  2nd-level combination strategies (logistic-regression / XGBoost / CatBoost meta-models,
+  band-local corrections, different OOF-member subsets). Best result: a 2nd-level
+  logistic-regression stack over 5 different 1st-level combinations, meta-CV OOF≈0.97004.
+- **`stack_logreg.py`**, **`meta_stack_test.py`** — the underlying meta-model fitting
+  helpers used by the scripts above.
+- **`stack_extra_2026-08-30.py`** — has a known bug in its test-set prediction path
+  (produces a constant column); its OOF numbers are fine but its submission output is
+  not, kept as-is for the record rather than silently fixed.
+- **`stack_finale_2026-08-30.py`**, **`final_verify_2026-08-30.py`** — assembled and
+  sanity-checked the final 10 candidate submissions from the above.
+
+This step was never confirmed on the leaderboard — the competition ended before a
+result came back. `src/main.py` reproduces the confirmed-best step before it
+(OOF≈0.9691, LB=0.97035).
 
 ## `gbdt_fe/` — GBDT feature-engineering variants
 

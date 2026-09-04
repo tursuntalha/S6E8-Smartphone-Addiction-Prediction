@@ -13,7 +13,7 @@ from nn_common import LookupTransformerNet, LookupDataset, train_model, device
 
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import NN_CACHE as CACHE_DIR
+from src.config import NN_CACHE as CACHE_DIR
 MASK_PROBS = [0.30, 0.40, 0.50]
 REFERENCE_AUC = 0.96507
 ROUND1_BEST = 0.96619  # mask_prob=0.20

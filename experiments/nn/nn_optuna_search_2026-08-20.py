@@ -23,7 +23,7 @@ from nn_common import LookupTransformerNet, LookupDataset, train_model, device
 SEED = 42
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import NN_CACHE as CACHE_DIR
+from src.config import NN_CACHE as CACHE_DIR
 N_TRIALS = 20
 SEARCH_EPOCHS = 18
 SEARCH_PATIENCE = 4

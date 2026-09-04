@@ -23,7 +23,7 @@ from resnet_model import ResNetTabular, device
 SEED = 42
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import NN_CACHE as CACHE_DIR
+from src.config import NN_CACHE as CACHE_DIR
 N_FOLDS = 5
 EPOCHS = 100
 PATIENCE = 12

@@ -8,7 +8,7 @@ import time
 
 import sys, os
 sys.path.insert(0, os.getcwd())
-from config import DATA, SUB, CONFIGS
+from src.config import DATA, SUB, CONFIGS
 SEED = 42
 RUN_NAME = 'lgbm_categorical'
 

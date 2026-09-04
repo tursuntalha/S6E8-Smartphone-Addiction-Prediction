@@ -8,19 +8,20 @@ dataset of ~1M rows. Best confirmed public leaderboard score: **AUC = 0.97035**.
 The pipeline combines a tuned GBDT ensemble with a custom transformer-style neural
 network, blended and later stacked with community out-of-fold (OOF) predictions.
 
-1. **Data analysis & generator reverse-engineering** (`src/eda/`) — the competition
-   data is synthetic, derived from a small (~7500-row) real dataset. Recovered the
-   generator's hard decision rule (`daily_screen_time_hours > 8 OR social_media_hours > 4
-   → label = 1`, and the symmetric certain-negative rule) and confirmed train/test come
-   from the same distribution (PSI = 0), which makes cross-validation a reliable proxy
-   for the leaderboard here.
-2. **Feature engineering** (`src/features/`) — target encoding (raw value + smoothed
+1. **Data analysis & generator reverse-engineering** (`notebooks/01_eda.ipynb`,
+   `experiments/eda/`) — the competition data is synthetic, derived from a small
+   (~7500-row) real dataset. Recovered the generator's hard decision rule
+   (`daily_screen_time_hours > 8 OR social_media_hours > 4 → label = 1`, and the
+   symmetric certain-negative rule) and confirmed train/test come from the same
+   distribution (PSI = 0), which makes cross-validation a reliable proxy for the
+   leaderboard here.
+2. **Feature engineering** (`src/features.py`) — target encoding (raw value + smoothed
    TE) on every continuous column, ratio/difference features between usage columns, and
    "ORIG-CDF" features that place each row against the empirical distribution of the
    small original (pre-synthesis) dataset.
-3. **GBDT ensemble** (`src/models/gbdt/`) — LightGBM + XGBoost + CatBoost, each
-   independently Optuna-tuned, combined by rank averaging.
-4. **Neural network** (`src/models/nn/`) — a "Lookup-Transformer": per-column exact-value
+3. **GBDT ensemble** (`src/model_gbdt.py`) — LightGBM + XGBoost + CatBoost, each
+   independently Optuna-tuned (`experiments/tuning/`), combined by rank averaging.
+4. **Neural network** (`src/model_nn.py`) — a "Lookup-Transformer": per-column exact-value
    lookup embeddings + learned periodic-linear (Fourier) trend features feed a small
    TransformerEncoder. Trained with **missingness augmentation** (randomly masking
    additional values during training) — the single biggest solo-model gain in the
@@ -28,10 +29,14 @@ network, blended and later stacked with community out-of-fold (OOF) predictions.
    6+ missing fields and the model needs to be robust across that whole range. This
    technique was written up as a public Kaggle Discussion post with a companion
    notebook.
-5. **Blending & stacking** (`src/ensembling/`) — GBDT/NN blend weight found by scanning
-   the out-of-fold AUC surface (no extra leaderboard submissions spent); the final push
-   extended this into a second-level stack over ~100 OOF members pooled from several
-   community-shared OOF libraries.
+5. **Blending** (`src/main.py`, using `src/utils.py`'s weight search) — GBDT/NN blend
+   weight found by scanning the out-of-fold AUC surface (no extra leaderboard
+   submissions spent). A further, more involved push stacked this blend with ~100 OOF
+   members pooled from several community-shared OOF libraries — see
+   [`experiments/README.md`](experiments/README.md#stacking--the-community-oof-library-leaderboard-push)
+   and `notebooks/04_ensembling.ipynb` for the method (that final stack depended on
+   external datasets and rapidly-iterated scripts, so it lives in `experiments/stacking/`
+   rather than the maintained `src/` pipeline).
 
 See [`experiments/README.md`](experiments/README.md) for what was tried and rejected
 along the way, with the measured result for each.
@@ -58,62 +63,59 @@ along the way, with the measured result for each.
 ## Repository structure
 
 ```
-src/                    Production pipeline, organized by stage
-  eda/                  Generator/data analysis (reused throughout the project)
-  tuning/               Optuna hyperparameter searches (LightGBM/XGBoost/CatBoost)
-  features/             Feature engineering (target encoding, ORIG-CDF, NN data prep)
-  models/gbdt/           LightGBM+XGBoost+CatBoost training & blending
-  models/nn/             Lookup-Transformer training
-  ensembling/            GBDT×NN blends and the final OOF-library stack
+src/                    The pipeline: a small number of clean, runnable modules
+  config.py              Path constants (DATA/NN_CACHE/SUB/CONFIGS)
+  utils.py                Shared helpers: target/frequency encoding, ORIG-CDF reference
+                          fitting, rank-average blending, OOF weight search
+  features.py             Feature engineering for both the GBDT and NN views of the data
+  model_gbdt.py            LightGBM + XGBoost + CatBoost training
+  model_nn.py              The Lookup-Transformer NN (model, dataset, training loop)
+  main.py                  Entry point: runs every stage end to end, writes a submission
+                          (`python src/main.py`, or `--fast` for a smoke test)
 
-experiments/            Tried-and-rejected or superseded directions, kept for the
-                         research trail (each subfolder = one line of investigation
-                         that did not make it into the final pipeline)
-  gbdt_fe/               Rejected/neutral feature-engineering variants (pair-lattice
-                         target encoding, decimal-lattice, frequency encoding, ...)
-  nn/                    Rejected/superseded NN variants (grouped missingness-aug,
-                         hyperparameter tuning, label smoothing, ...)
-  resnet/                Attention-free tabular ResNet, built for architecture
-                         diversity — net negative, closed
-  tabm/                  TabM batch-ensemble — closed (GPU power-limited hardware)
-  early_k1/              Early (day 1-2) model-family and augmentation exploration
+experiments/            Everything that isn't the maintained pipeline: diagnostic/setup
+                         scripts (eda/, tuning/), the final community-OOF stacking push
+                         (stacking/), and every rejected or superseded modeling idea
+                         (gbdt_fe/, nn/, resnet/, tabm/, early_k1/) — see
+                         experiments/README.md for what each one is and what it returned
 
 notebooks/              Four notebooks walking through EDA, feature engineering, the
                          full GBDT pipeline, and ensembling — see notebooks/README.md
 configs/                Best hyperparameters found for each GBDT model (JSON)
-config.py               Single source of truth for the data/cache/submission/config
-                         directory names every script imports (see below)
 
 data/, sub/, nn_cache/  Not tracked in git — raw data, submissions, and cached
                          OOF/model artifacts. Not present in a fresh checkout except
-                         data/.placeholder; scripts create sub/ and nn_cache/ as needed.
+                         data/.placeholder; the pipeline creates sub/ and nn_cache/
+                         as needed.
 ```
 
 ## Path configuration
 
-Every script imports its directory names (`DATA`, `NN_CACHE`, `SUB`, `CONFIGS`) from
-[`config.py`](config.py) at the repo root instead of hardcoding them, e.g.:
+Every module imports its directory names (`DATA`, `NN_CACHE`, `SUB`, `CONFIGS`) from
+[`src/config.py`](src/config.py) instead of hardcoding them, e.g.:
 
 ```python
-from config import DATA, SUB
+from src.config import DATA, SUB
 train = pd.read_csv(f'{DATA}/train.csv')
 ```
 
 To point the pipeline at different locations (e.g. an external drive for `data/`),
-edit `config.py` once rather than each script.
+edit `src/config.py` once rather than each module.
 
 ## Reproducing
 
 Requires the competition data from Kaggle
 ([`playground-series-s6e8`](https://www.kaggle.com/competitions/playground-series-s6e8)):
-place `train.csv`, `test.csv`, `sample_submission.csv` under `data/` (replacing the
-`data/.placeholder` file that keeps the empty folder in git). Scripts are run from the
-repository root, e.g.:
+place `train.csv`, `test.csv`, `sample_submission.csv`, and the small original dataset
+under `data/` (replacing the `data/.placeholder` file that keeps the empty folder in
+git). Run from the repository root:
 
 ```
 pip install -r requirements.txt
-python src/models/gbdt/lgbm_xgb_cat_ABD_combined_2026-08-19.py
-python src/features/lgbm_orig_features_lb_2026-08-21.py
-python src/models/nn/nn_train_kfold_missingaug_featfull_2026-08-29.py
-python src/ensembling/blend_gbdt_origfeat_nn_featfull_2026-08-29.py
+python src/main.py            # full run — needs a GPU for a reasonable runtime
+python src/main.py --fast     # tiny smoke-test config, verifies the pipeline runs
 ```
+
+`main.py` runs every stage (feature engineering → GBDT → NN → blend) and writes
+`sub/submission.csv`. To reproduce a specific historical result or hyperparameter
+search instead of the current `src/` pipeline, see `experiments/README.md`.
