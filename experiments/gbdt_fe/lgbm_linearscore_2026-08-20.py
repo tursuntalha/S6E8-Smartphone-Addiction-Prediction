@@ -19,7 +19,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -173,7 +175,7 @@ lr_final = LogisticRegression(max_iter=2000, C=1.0).fit(lr_X_tr_s, y)
 linscore_te = lr_final.predict_proba(lr_X_te_s)[:, 1]
 print(f'Dogrusal-skor OOF AUC (tek basina): {roc_auc_score(y, linscore_tr):.5f}  ({time.time()-t0:.0f}s)')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
 params_lgb = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED, **tuned_lgb)
 

@@ -9,7 +9,9 @@ from scipy.stats import rankdata
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 t0 = time.time()
 
@@ -61,7 +63,7 @@ print(f'Features: {X.shape[1]} | enc: {time.time()-t0:.0f}s')
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 fold_idx = list(skf.split(X, y))
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 
 # ---------- LightGBM (CPU) ----------
@@ -80,7 +82,7 @@ print(f'LightGBM OOF AUC: {roc_auc_score(y, oof_lgb):.5f} ({time.time()-t0:.0f}s
 # 2026-08-12: bagimsiz Optuna ile tune edildi (scripts/tune_xgb.py, raw+TE seti, 40 trial,
 # holdout AUC 0.96648). min_child_weight=15.2 cikti, eski cevrilmis deger olan 300'den
 # cok uzak -> eski params XGB'yi asiri regularize ediyormus.
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
 oof_xgb = np.zeros(len(X)); pred_xgb = np.zeros(len(X_test))
 params_xgb = dict(objective='binary:logistic', eval_metric='auc', n_estimators=5000,
@@ -95,7 +97,7 @@ print(f'XGBoost OOF AUC: {roc_auc_score(y, oof_xgb):.5f} ({time.time()-t0:.0f}s)
 # ---------- CatBoost (GPU) ----------
 # 2026-08-12: bagimsiz Optuna ile tune edildi (scripts/tune_cat.py, raw+TE seti, 40 trial,
 # holdout AUC 0.96603). l2_leaf_reg=6.0 cikti (eski varsayilan 3.0'dan farkli).
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 oof_cat = np.zeros(len(X)); pred_cat = np.zeros(len(X_test))
 for tr, va in fold_idx:
@@ -117,15 +119,15 @@ print(f'Karşılaştırma -> v2 blend (SMOOTH=20, LB 0.96864): 0.96751 | v3 blen
 # NOT: /max(pred_rank) normalizasyonu sadece AUC (rank-invariant metrik) icin zararsiz.
 # Metrik logloss/brier olsaydi bu satir yanlis olurdu.
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': pred_rank / max(pred_rank)})
-sub_path = 'sub/lgbm_xgb_cat_rankblend_v3_smooth3_2026-08-12.csv'
+sub_path = f'{SUB}/lgbm_xgb_cat_rankblend_v3_smooth3_2026-08-12.csv'
 sub.to_csv(sub_path, index=False)
 
 # Stacking icin OOF/test tahminlerini sakla (base modelleri tekrar egitmemek icin)
-np.save('sub/oof_lgb.npy', oof_lgb); np.save('sub/pred_lgb.npy', pred_lgb)
-np.save('sub/oof_xgb.npy', oof_xgb); np.save('sub/pred_xgb.npy', pred_xgb)
-np.save('sub/oof_cat.npy', oof_cat); np.save('sub/pred_cat.npy', pred_cat)
-np.save('sub/blend_y.npy', y)
-np.save('sub/blend_test_id.npy', test['id'].values)
+np.save(f'{SUB}/oof_lgb.npy', oof_lgb); np.save(f'{SUB}/pred_lgb.npy', pred_lgb)
+np.save(f'{SUB}/oof_xgb.npy', oof_xgb); np.save(f'{SUB}/pred_xgb.npy', pred_xgb)
+np.save(f'{SUB}/oof_cat.npy', oof_cat); np.save(f'{SUB}/pred_cat.npy', pred_cat)
+np.save(f'{SUB}/blend_y.npy', y)
+np.save(f'{SUB}/blend_test_id.npy', test['id'].values)
 print('Saved OOF/test arrays for stacking: sub/oof_{lgb,xgb,cat}.npy, sub/pred_{lgb,xgb,cat}.npy')
 print(f'Saved: {sub_path}')
 print(f'Elapsed: {time.time()-t0:.0f}s')

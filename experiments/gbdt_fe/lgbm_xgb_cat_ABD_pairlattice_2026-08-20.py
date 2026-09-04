@@ -19,7 +19,9 @@ from scipy.stats import rankdata
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 JOINT_SMOOTH = 10.0
@@ -121,11 +123,11 @@ for c in all_cats + extra_cols:
 y = train['addicted_label'].values
 prior = y.mean()
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 
 te_skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
@@ -217,13 +219,13 @@ print(f'\n3-model blend OOF AUC: {roc_auc_score(y, blend_oof):.5f}  (ABD referan
 
 blend_pred = (rankdata(pred_lgb) + rankdata(pred_xgb) + rankdata(pred_cat)) / 3
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': blend_pred / max(blend_pred)})
-sub_path = 'sub/2026-08-20/lgbm_xgb_cat_ABD_pairlattice_2026-08-20.csv'
+sub_path = f'{SUB}/2026-08-20/lgbm_xgb_cat_ABD_pairlattice_2026-08-20.csv'
 import os
-os.makedirs('sub/2026-08-20', exist_ok=True)
+os.makedirs(f'{SUB}/2026-08-20', exist_ok=True)
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')
 
-np.save('nn_cache/gbdt_abd_pairlattice_oof.npy', blend_oof)
-np.save('nn_cache/gbdt_abd_pairlattice_test_pred.npy', blend_pred)
+np.save(f'{NN_CACHE}/gbdt_abd_pairlattice_oof.npy', blend_oof)
+np.save(f'{NN_CACHE}/gbdt_abd_pairlattice_test_pred.npy', blend_pred)
 print('Saved: nn_cache/gbdt_abd_pairlattice_oof.npy, nn_cache/gbdt_abd_pairlattice_test_pred.npy')
 print(f'Elapsed: {time.time()-t0:.0f}s')

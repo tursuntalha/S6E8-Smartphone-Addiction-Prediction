@@ -9,12 +9,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.special import logit, expit
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, save_submission, CACHE
 
 SMOOTH = 1e-6
-train = pd.read_csv('data/train.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values.astype(np.uint8)
 n = len(y)
 skf = StratifiedKFold(5, shuffle=True, random_state=42)
@@ -87,7 +90,7 @@ XT2 = np.column_stack([logit(np.clip(load(q)[1], SMOOTH, 1 - SMOOTH)) for q in m
 oof2, pred2 = lr_honest(X2, XT2)
 print(f'meta-LR of {mets2}: {roc_auc_score(y, oof2):.5f}', flush=True)
 
-test_id = pd.read_csv('data/test.csv')['id'].values
+test_id = pd.read_csv(f'{DATA}/test.csv')['id'].values
 for nm, pp in [('exp_meta5', pred), ('exp_meta6', pred2)]:
     save_submission(nm, test_id, pp)
 print('DONE', flush=True)

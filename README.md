@@ -33,8 +33,8 @@ network, blended and later stacked with community out-of-fold (OOF) predictions.
    extended this into a second-level stack over ~100 OOF members pooled from several
    community-shared OOF libraries.
 
-See [`docs/gunluk.md`](docs/gunluk.md) for the full day-by-day research log (Turkish) —
-every experiment below is described there in detail, including reasoning and dead ends.
+See [`experiments/README.md`](experiments/README.md) for what was tried and rejected
+along the way, with the measured result for each.
 
 ## Key findings
 
@@ -78,19 +78,37 @@ experiments/            Tried-and-rejected or superseded directions, kept for th
   tabm/                  TabM batch-ensemble — closed (GPU power-limited hardware)
   early_k1/              Early (day 1-2) model-family and augmentation exploration
 
-notebooks/              EDA notebook and a teaching/write-up notebook
-docs/gunluk.md          Full research diary (Turkish)
+notebooks/              Four notebooks walking through EDA, feature engineering, the
+                         full GBDT pipeline, and ensembling — see notebooks/README.md
 configs/                Best hyperparameters found for each GBDT model (JSON)
-data/, sub/, nn_cache/  Not tracked in git (see below) — raw data, submissions, and
-                         cached OOF/model artifacts
+config.py               Single source of truth for the data/cache/submission/config
+                         directory names every script imports (see below)
+
+data/, sub/, nn_cache/  Not tracked in git — raw data, submissions, and cached
+                         OOF/model artifacts. Not present in a fresh checkout except
+                         data/.placeholder; scripts create sub/ and nn_cache/ as needed.
 ```
+
+## Path configuration
+
+Every script imports its directory names (`DATA`, `NN_CACHE`, `SUB`, `CONFIGS`) from
+[`config.py`](config.py) at the repo root instead of hardcoding them, e.g.:
+
+```python
+from config import DATA, SUB
+train = pd.read_csv(f'{DATA}/train.csv')
+```
+
+To point the pipeline at different locations (e.g. an external drive for `data/`),
+edit `config.py` once rather than each script.
 
 ## Reproducing
 
 Requires the competition data from Kaggle
 ([`playground-series-s6e8`](https://www.kaggle.com/competitions/playground-series-s6e8)):
-place `train.csv`, `test.csv`, `sample_submission.csv` under `data/`. Scripts are run
-from the repository root, e.g.:
+place `train.csv`, `test.csv`, `sample_submission.csv` under `data/` (replacing the
+`data/.placeholder` file that keeps the empty folder in git). Scripts are run from the
+repository root, e.g.:
 
 ```
 pip install -r requirements.txt
@@ -99,6 +117,3 @@ python src/features/lgbm_orig_features_lb_2026-08-21.py
 python src/models/nn/nn_train_kfold_missingaug_featfull_2026-08-29.py
 python src/ensembling/blend_gbdt_origfeat_nn_featfull_2026-08-29.py
 ```
-
-`data/`, `sub/`, and `nn_cache/` are git-ignored (large, and partly built from
-community-shared OOF datasets not meant for redistribution).

@@ -18,15 +18,18 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.stats import rankdata
 from itertools import combinations
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB
 
 t0 = time.time()
-train = pd.read_csv('data/train.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values
 
 names = ['lgb_old42', 'xgb_old42', 'cat_old42', 'rf_k1', 'et_k1', 'histgb_k1']
-files = ['sub/oof_lgb.npy', 'sub/oof_xgb.npy', 'sub/oof_cat.npy',
-         'sub/oof_random_forest_k1_2026-08-14.npy', 'sub/oof_extra_trees_k1_2026-08-14.npy',
-         'sub/oof_hist_gb_sklearn_k1_2026-08-14.npy']
+files = [f'{SUB}/oof_lgb.npy', f'{SUB}/oof_xgb.npy', f'{SUB}/oof_cat.npy',
+         f'{SUB}/oof_random_forest_k1_2026-08-14.npy', f'{SUB}/oof_extra_trees_k1_2026-08-14.npy',
+         f'{SUB}/oof_hist_gb_sklearn_k1_2026-08-14.npy']
 oofs = {n: np.load(f) for n, f in zip(names, files)}
 
 print('Standalone AUC ve korelasyonlar:')

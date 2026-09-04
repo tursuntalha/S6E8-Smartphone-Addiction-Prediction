@@ -5,7 +5,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from scipy.stats import pearsonr
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 train = pd.read_csv(f'{DATA}/train.csv')
 feats = [c for c in train.columns if c not in ['id', 'addicted_label']]
 

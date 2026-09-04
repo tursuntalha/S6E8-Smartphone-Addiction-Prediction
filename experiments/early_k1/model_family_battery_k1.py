@@ -17,7 +17,9 @@ from scipy.stats import rankdata, pearsonr
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -106,7 +108,7 @@ X = pd.concat([raw_tr, enc_tr.add_prefix('te_')], axis=1)
 X_test = pd.concat([raw_te, enc_te.add_prefix('te_')], axis=1)
 print(f'K1 feature set hazir: {X.shape[1]} ozellik, {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
@@ -176,6 +178,6 @@ for n1 in names:
             print(f'  corr({n1}, {n2}) = {c:.5f}')
 
 for name in ['random_forest', 'extra_trees', 'hist_gb_sklearn']:
-    np.save(f'sub/oof_{name}_k1_2026-08-14.npy', oof_store[name])
+    np.save(f'{SUB}/oof_{name}_k1_2026-08-14.npy', oof_store[name])
 
 print(f'\nToplam sure: {time.time()-t0:.0f}s')

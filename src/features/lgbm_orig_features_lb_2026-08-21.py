@@ -19,7 +19,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from sklearn.neighbors import KernelDensity
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -286,11 +288,11 @@ for c in all_cats + extra_cols:
 y = train['addicted_label'].values
 prior = y.mean()
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 
 te_skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
@@ -375,7 +377,7 @@ print(f'\n3-model blend (ORIG-eklenmis) OOF AUC = {auc:.5f}  (K1+A+B+D referans 
 imp_df = pd.DataFrame({'feature': feature_names, 'gain_importance': importances})
 imp_df = imp_df.sort_values('gain_importance', ascending=False).reset_index(drop=True)
 imp_df['rank'] = imp_df.index + 1
-imp_df.to_csv('nn_cache/orig_features_importance_2026-08-21.csv', index=False)
+imp_df.to_csv(f'{NN_CACHE}/orig_features_importance_2026-08-21.csv', index=False)
 
 print(f'\nToplam {len(feature_names)} feature, ORIG feature sayisi: {len(ORIG_FEATURE_NAMES)}')
 orig_ranks = imp_df[imp_df['feature'].isin(ORIG_FEATURE_NAMES)]
@@ -390,13 +392,13 @@ print(imp_df.head(20)[['rank', 'feature', 'gain_importance']].to_string(index=Fa
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': blend_pred / max(blend_pred)})
 import os
-os.makedirs('sub/2026-08-21', exist_ok=True)
-sub_path = 'sub/2026-08-21/lgbm_xgb_cat_ABD_origfeat_2026-08-21.csv'
+os.makedirs(f'{SUB}/2026-08-21', exist_ok=True)
+sub_path = f'{SUB}/2026-08-21/lgbm_xgb_cat_ABD_origfeat_2026-08-21.csv'
 sub.to_csv(sub_path, index=False)
 print(f'\nSaved: {sub_path}')
 
-np.save('nn_cache/gbdt_abd_origfeat_oof.npy', blend_oof)
-np.save('nn_cache/gbdt_abd_origfeat_test_pred.npy', blend_pred)
+np.save(f'{NN_CACHE}/gbdt_abd_origfeat_oof.npy', blend_oof)
+np.save(f'{NN_CACHE}/gbdt_abd_origfeat_test_pred.npy', blend_pred)
 print('Saved: nn_cache/gbdt_abd_origfeat_oof.npy, nn_cache/gbdt_abd_origfeat_test_pred.npy '
       '(NN ile blend icin - LB dogrulandi: 0.96998)')
 print(f'Elapsed: {time.time()-t0:.0f}s')

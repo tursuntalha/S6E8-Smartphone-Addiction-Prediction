@@ -8,14 +8,16 @@ import os, glob, time
 from scipy.special import logit
 from scipy.stats import rankdata
 
-CACHE = 'nn_cache'
-L = 'data/oof_library/oof'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE as CACHE, SUB
+L = f'{DATA}/oof_library/oof'
 SMOOTH = 1e-6
 
 
 def load_all():
     t0 = time.time()
-    train = pd.read_csv('data/train.csv')
+    train = pd.read_csv(f'{DATA}/train.csv')
     y = train['addicted_label'].values.astype(np.uint8)
     n = len(y)
     names_lib = sorted(os.path.basename(p)[4:-4] for p in glob.glob(f'{L}/oof_*.npy'))
@@ -61,10 +63,10 @@ def get_transforms(names, O, T, n, ntest):
 
 def save_submission(name, test_id, pred):
     import pandas as pd
-    os.makedirs('sub/2026-08-30', exist_ok=True)
+    os.makedirs(f'{SUB}/2026-08-30', exist_ok=True)
     p = np.clip(pred, 1e-6, 1 - 1e-6)
     p = p / p.max()
-    path = f'sub/2026-08-30/{name}_2026-08-30.csv'
+    path = f'{SUB}/2026-08-30/{name}_2026-08-30.csv'
     pd.DataFrame({'id': test_id, 'addicted_label': p}).to_csv(path, index=False)
     print(f'Saved: {path}', flush=True)
     return path

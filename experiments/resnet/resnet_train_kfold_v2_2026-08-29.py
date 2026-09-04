@@ -21,7 +21,9 @@ from sklearn.metrics import roc_auc_score
 from resnet_model import ResNetTabular, device
 
 SEED = 42
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR
 N_FOLDS = 5
 EPOCHS = 100
 PATIENCE = 12

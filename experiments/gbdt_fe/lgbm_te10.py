@@ -6,7 +6,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 N_FOLDS_TE = 10          # target encoding fold sayısı (yazar 10 kullanıyor)
 SMOOTH = 20.0            # m-estimate smoothing
@@ -64,7 +66,7 @@ feats = all_cats
 print(f'Encoding bitti: {time.time()-t0:.0f}s')
 
 # ---- LightGBM 5-fold CV (tuned params, numerik özellikler) ----
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 params = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1,
               random_state=SEED, **tuned)
@@ -89,7 +91,7 @@ print('\nÖnem (top 8):')
 print(imp.head(8).round(0).to_string())
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': test_pred})
-sub_path = f'sub/{RUN_NAME}_2026-08-11.csv'
+sub_path = f'{SUB}/{RUN_NAME}_2026-08-11.csv'
 sub.to_csv(sub_path, index=False)
 print(f'\nSaved: {sub_path}')
 print(f'Elapsed: {time.time()-t0:.0f}s')

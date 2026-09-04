@@ -1,5 +1,6 @@
 # Data (Kaggle competition data + community OOF libraries — not redistributed)
-data/
+data/*
+!data/.placeholder
 
 # Large generated artifacts
 nn_cache/

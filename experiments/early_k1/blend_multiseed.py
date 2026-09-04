@@ -9,7 +9,9 @@ from scipy.stats import rankdata
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEEDS = [42, 43, 44]
 SMOOTH = 3.0
 t0 = time.time()
@@ -55,11 +57,11 @@ for c in all_cats + extra_cols:
 y = train['addicted_label'].values
 prior = y.mean()
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 
 all_oof = {}   # (model, seed) -> oof array
@@ -153,7 +155,7 @@ avg_pred_cat = np.mean([all_pred[('cat', s)] for s in SEEDS], axis=0)
 multiseed_pred = (rankdata(avg_pred_lgb) + rankdata(avg_pred_xgb) + rankdata(avg_pred_cat)) / 3
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': multiseed_pred / max(multiseed_pred)})
-sub_path = 'sub/lgbm_xgb_cat_multiseed_2026-08-13.csv'
+sub_path = f'{SUB}/lgbm_xgb_cat_multiseed_2026-08-13.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')
 print(f'Elapsed: {time.time()-t0:.0f}s')

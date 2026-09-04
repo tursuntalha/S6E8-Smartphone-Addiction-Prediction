@@ -7,7 +7,9 @@ from catboost import CatBoostClassifier, Pool
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, CONFIGS
 SEED = 42
 N_TRIALS = 40
 t0 = time.time()
@@ -78,7 +80,7 @@ print('Best params:')
 for k, v in study.best_params.items():
     print(f'  {k}: {v}')
 
-with open('sub/best_params_cat.json', 'w') as f:
+with open(f'{CONFIGS}/best_params_cat.json', 'w') as f:
     json.dump(study.best_params, f, indent=2)
-print('Saved: sub/best_params_cat.json')
+print(f'Saved: {CONFIGS}/best_params_cat.json')
 print(f'Elapsed: {time.time()-t0:.0f}s')

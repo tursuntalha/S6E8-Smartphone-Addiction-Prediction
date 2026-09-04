@@ -13,7 +13,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -99,7 +101,7 @@ enc_tr['dominant_activity'] = oof_dom
 enc_te['dominant_activity'] = te_dom
 print(f'TE encoding hazir: {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 params = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED, **tuned)
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
@@ -136,7 +138,7 @@ def run(name, raw_cols, te_extra=None):
     results[name] = cv_auc
     print(f'[{name}] CV OOF AUC = {cv_auc:.5f}  ({time.time()-t1:.0f}s, {Xc.shape[1]} ozellik)')
     sub = pd.DataFrame({'id': test['id'], 'addicted_label': test_pred})
-    sub.to_csv(f'sub/lgbm_fe_{name}_2026-08-13.csv', index=False)
+    sub.to_csv(f'{SUB}/lgbm_fe_{name}_2026-08-13.csv', index=False)
     print(f'  Saved: sub/lgbm_fe_{name}_2026-08-13.csv\n')
 
 

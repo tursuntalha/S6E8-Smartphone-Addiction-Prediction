@@ -19,7 +19,9 @@ from sklearn.metrics import roc_auc_score
 from nn_common import LookupTransformerNet, LookupDataset, train_model, predict_probabilities, device
 
 SEED = 42
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR
 N_FOLDS = 5
 
 with open(f'{CACHE_DIR}/optuna_best_params.json') as f:

@@ -24,12 +24,14 @@ from sklearn.metrics import roc_auc_score
 from sklearn.neural_network import MLPClassifier
 
 t0 = time.time()
-CACHE = 'nn_cache'
-L = 'data/oof_library/oof'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE as CACHE, SUB
+L = f'{DATA}/oof_library/oof'
 SMOOTH = 1e-6
 
-train = pd.read_csv('data/train.csv')
-test = pd.read_csv('data/test.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
+test = pd.read_csv(f'{DATA}/test.csv')
 y = train['addicted_label'].values
 test_id = test['id'].values
 n = len(y)
@@ -221,10 +223,10 @@ for name, auc in sorted(results.items(), key=lambda kv: -kv[1]):
     print(f'  {name:28s} OOF AUC={auc:.5f}')
 
 # submission dosyalarini yaz (id sirasi test.csv)
-os.makedirs('sub/2026-08-30', exist_ok=True)
+os.makedirs(f'{SUB}/2026-08-30', exist_ok=True)
 for name, v in variants.items():
     p = np.clip(v['test'], SMOOTH, 1 - SMOOTH)
     p = p / p.max()
     out = pd.DataFrame({'id': test_id, 'addicted_label': p})
-    out.to_csv(f'sub/2026-08-30/stack_{name}_2026-08-30.csv', index=False)
+    out.to_csv(f'{SUB}/2026-08-30/stack_{name}_2026-08-30.csv', index=False)
     print(f'Saved: sub/2026-08-30/stack_{name}_2026-08-30.csv')

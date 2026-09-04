@@ -30,7 +30,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from sklearn.neighbors import KernelDensity
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -305,7 +307,7 @@ for c in all_cats + extra_cols:
 y = train['addicted_label'].values
 prior = y.mean()
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
 
 te_skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
@@ -368,6 +370,6 @@ auc_orig, oof_orig = run_lgb_cv(X_orig, 'ABD + ORIG-CDF (29 yeni feature)')
 
 print(f'\nDelta: {auc_orig - auc_base:+.5f}  (kalibrasyon esigi: 0.0003 guvenilir, <0.00015 gurultu)')
 
-np.save('nn_cache/orig_feat_baseline_oof.npy', oof_base)
-np.save('nn_cache/orig_feat_added_oof.npy', oof_orig)
+np.save(f'{NN_CACHE}/orig_feat_baseline_oof.npy', oof_base)
+np.save(f'{NN_CACHE}/orig_feat_added_oof.npy', oof_orig)
 print(f'Elapsed: {time.time()-t0:.0f}s')

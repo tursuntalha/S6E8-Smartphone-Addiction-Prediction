@@ -4,14 +4,17 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.stats import rankdata
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import SUB
 
 SEED = 42
 
-y = np.load('sub/blend_y.npy')
-oof_lgb = np.load('sub/oof_lgb.npy'); pred_lgb = np.load('sub/pred_lgb.npy')
-oof_xgb = np.load('sub/oof_xgb.npy'); pred_xgb = np.load('sub/pred_xgb.npy')
-oof_cat = np.load('sub/oof_cat.npy'); pred_cat = np.load('sub/pred_cat.npy')
-test_id = np.load('sub/blend_test_id.npy')
+y = np.load(f'{SUB}/blend_y.npy')
+oof_lgb = np.load(f'{SUB}/oof_lgb.npy'); pred_lgb = np.load(f'{SUB}/pred_lgb.npy')
+oof_xgb = np.load(f'{SUB}/oof_xgb.npy'); pred_xgb = np.load(f'{SUB}/pred_xgb.npy')
+oof_cat = np.load(f'{SUB}/oof_cat.npy'); pred_cat = np.load(f'{SUB}/pred_cat.npy')
+test_id = np.load(f'{SUB}/blend_test_id.npy')
 
 # Rank-average referans (blend_lgb_xgb_cat.py ile ayni deger cikmali)
 oof_rank = (rankdata(oof_lgb) + rankdata(oof_xgb) + rankdata(oof_cat)) / 3
@@ -44,6 +47,6 @@ print(f'Karşılaştırma -> rank-average: {roc_auc_score(y, oof_rank):.5f} | st
 print(f'Ortalama katsayılar (lgb, xgb, cat): {np.mean(coefs, axis=0).round(3)}')
 
 sub = pd.DataFrame({'id': test_id, 'addicted_label': meta_test})
-sub_path = 'sub/lgbm_xgb_cat_stack_2026-08-12.csv'
+sub_path = f'{SUB}/lgbm_xgb_cat_stack_2026-08-12.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')

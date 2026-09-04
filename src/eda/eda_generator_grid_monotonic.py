@@ -1,7 +1,9 @@
 import pandas as pd
 import numpy as np
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values
 

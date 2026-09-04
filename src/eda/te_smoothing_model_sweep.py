@@ -6,7 +6,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, CONFIGS
 SEED = 42
 SMOOTH_VALUES = [0.5, 1, 2, 3]
 t0 = time.time()
@@ -32,7 +34,7 @@ y = train['addicted_label'].values
 prior = y.mean()
 te_skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=SEED)
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 params = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED, **tuned)
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)

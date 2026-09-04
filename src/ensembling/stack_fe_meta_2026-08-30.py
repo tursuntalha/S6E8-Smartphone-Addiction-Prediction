@@ -11,13 +11,16 @@ import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.special import logit
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, save_submission, CACHE
 
 SMOOTH = 1e-6
-tr = pd.read_csv('data/train.csv')
-te = pd.read_csv('data/test.csv')
+tr = pd.read_csv(f'{DATA}/train.csv')
+te = pd.read_csv(f'{DATA}/test.csv')
 test_id = te['id'].values
 y = tr['addicted_label'].values.astype(np.uint8)
 n = len(y)

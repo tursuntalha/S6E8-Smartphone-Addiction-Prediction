@@ -10,7 +10,9 @@ import pandas as pd
 from scipy.stats import rankdata
 from sklearn.metrics import roc_auc_score
 
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR, SUB
 
 y = np.load(f'{CACHE_DIR}/prepped_kfold_featfull.npz')['y']
 gbdt_oof = np.load(f'{CACHE_DIR}/gbdt_abd_origfeat_oof.npy')
@@ -53,7 +55,7 @@ r_nn_test = rankdata(nn_test)
 blend_test_rank = W_GBDT * r_gbdt_test + (1 - W_GBDT) * r_nn_test
 
 sub = pd.DataFrame({'id': test_id, 'addicted_label': blend_test_rank / blend_test_rank.max()})
-os.makedirs('sub/2026-08-29', exist_ok=True)
-sub_path = f'sub/2026-08-29/blend_gbdt_origfeat_nn_featfull_w{int(round(W_GBDT*100))}_2026-08-29.csv'
+os.makedirs(f'{SUB}/2026-08-29', exist_ok=True)
+sub_path = f'{SUB}/2026-08-29/blend_gbdt_origfeat_nn_featfull_w{int(round(W_GBDT*100))}_2026-08-29.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')

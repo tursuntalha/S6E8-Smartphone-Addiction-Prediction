@@ -9,7 +9,9 @@ from scipy.stats import rankdata
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -90,11 +92,11 @@ print(f'Encoding hazir: {time.time()-t0:.0f}s')
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 fold_idx = list(skf.split(X_full, y))  # ayni fold split'i tum modellerde kullaniliyor (adil karsilastirma)
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 
 # ---------- LightGBM: tam 42 ozellik ----------
@@ -147,7 +149,7 @@ print(f'OOF korelasyonlari (lgb-xgb, lgb-cat, xgb-cat): {corr_lx:.5f}, {corr_lc:
 print('(karsilastirma icin: ayni-feature-set blend genelde >0.99 korelasyonlu olurdu)')
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': pred_rank / max(pred_rank)})
-sub_path = 'sub/lgbm_xgb_cat_featuresubset_2026-08-13.csv'
+sub_path = f'{SUB}/lgbm_xgb_cat_featuresubset_2026-08-13.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')
 print(f'Elapsed: {time.time()-t0:.0f}s')

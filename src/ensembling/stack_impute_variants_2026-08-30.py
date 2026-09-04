@@ -29,12 +29,13 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from sklearn.neighbors import KernelDensity
 
-DATA = 'data'
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE, NN_CACHE as CACHE_DIR, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
-CX = 'nn_cache/impvar'
+CX = f'{NN_CACHE}/impvar'
 os.makedirs(CX, exist_ok=True)
 
 train = pd.read_csv(f'{DATA}/train.csv')
@@ -325,11 +326,11 @@ for c in all_cats + extra_cols:
 y = train['addicted_label'].values
 prior = y.mean()
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 
 # ================= TE + freq (1 kez) =================
@@ -418,7 +419,7 @@ def train_variant(name, imp_tr_k, imp_te_k):
     np.save(f'{CACHE_DIR}/imp_var_{name}_oof.npy', oof)
     np.save(f'{CACHE_DIR}/imp_var_{name}_test_pred.npy', pred)
     sub = pd.DataFrame({'id': test['id'], 'addicted_label': pred / max(pred)})
-    path = f'sub/2026-08-30/imp_var_{name}_2026-08-30.csv'
+    path = f'{SUB}/2026-08-30/imp_var_{name}_2026-08-30.csv'
     sub.to_csv(path, index=False)
     print(f'Saved: {path}', flush=True)
     return auc

@@ -16,6 +16,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.special import logit, expit
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, save_submission, CACHE
@@ -24,7 +27,7 @@ SMOOTH = 1e-6
 skf = StratifiedKFold(5, shuffle=True, random_state=42)
 
 # ---------- temel: y, folds, yardimcilar, results ----------
-train = pd.read_csv('data/train.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values.astype(np.uint8)
 n = len(y)
 folds = list(skf.split(np.zeros(n), y))
@@ -32,11 +35,11 @@ results = {}
 
 
 def add_sub(name, oof, pred):
-    test_id = pd.read_csv('data/test.csv')['id'].values
+    test_id = pd.read_csv(f'{DATA}/test.csv')['id'].values
     auc = roc_auc_score(y, oof)
     save_submission(name, test_id, pred)
     print(f'{name}: OOF AUC={auc:.5f}', flush=True)
-    return {'oof_auc': auc, 'sub': f'sub/2026-08-30/{name}_2026-08-30.csv'}
+    return {'oof_auc': auc, 'sub': f'{SUB}/2026-08-30/{name}_2026-08-30.csv'}
 
 
 def logit_avg(*preds):

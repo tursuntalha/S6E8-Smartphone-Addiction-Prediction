@@ -4,7 +4,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 SEED = 42
 
 train = pd.read_csv(f'{DATA}/train.csv')

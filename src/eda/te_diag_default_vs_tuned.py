@@ -6,7 +6,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 import time
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 t0 = time.time()
 
@@ -58,7 +60,7 @@ param_sets = {
     'default': dict(objective='binary', metric='auc', learning_rate=0.05, num_leaves=31,
                     min_child_samples=20, n_estimators=3000, verbosity=-1, random_state=SEED),
     'tuned': dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED,
-                  **json.load(open('sub/best_params_lgbm.json'))),
+                  **json.load(open(f'{CONFIGS}/best_params_lgbm.json'))),
 }
 
 for pname, params in param_sets.items():
@@ -73,7 +75,7 @@ for pname, params in param_sets.items():
     train_auc = roc_auc_score(y[tr_idx], model.predict_proba(X_enc.iloc[tr_idx])[:, 1])
     print(f'\n[{pname}] CV OOF AUC: {roc_auc_score(y, oof):.5f} | son fold train AUC: {train_auc:.5f}')
     if pname == 'default':
-        np.save('sub/te_test_pred_default.npy', test_pred)
-        np.save('sub/te_oof_default.npy', oof)
+        np.save(f'{SUB}/te_test_pred_default.npy', test_pred)
+        np.save(f'{SUB}/te_oof_default.npy', oof)
 
 print(f'Elapsed: {time.time()-t0:.0f}s')

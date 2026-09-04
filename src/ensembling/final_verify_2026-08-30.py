@@ -2,18 +2,21 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE, SUB
 
 SUBS = {
-    'exp_meta6': 'sub/2026-08-30/exp_meta6_2026-08-30.csv',
-    'exp_xgb': 'sub/2026-08-30/stack_exp_xgb_2026-08-30.csv',
-    'exp_ax': 'sub/2026-08-30/exp_ax_2026-08-30.csv',
-    'exp_all': 'sub/2026-08-30/stack_exp_all_2026-08-30.csv',
-    'exp_aligned': 'sub/2026-08-30/stack_exp_aligned_2026-08-30.csv',
-    'exp_cat': 'sub/2026-08-30/exp_cat_2026-08-30.csv',
-    'w66_prod': 'sub/2026-08-29/blend_gbdt_origfeat_nn_featfull_w66_2026-08-29.csv',
-    'stack_logit_lr': 'sub/2026-08-30/stack_logit_lr_2026-08-30.csv',
-    'stack_nnls': 'sub/2026-08-30/stack_nnls_2026-08-30.csv',
-    'extra_lr_raw9': 'sub/2026-08-30/stack_extra_lr_raw9_2026-08-30.csv',
+    'exp_meta6': f'{SUB}/2026-08-30/exp_meta6_2026-08-30.csv',
+    'exp_xgb': f'{SUB}/2026-08-30/stack_exp_xgb_2026-08-30.csv',
+    'exp_ax': f'{SUB}/2026-08-30/exp_ax_2026-08-30.csv',
+    'exp_all': f'{SUB}/2026-08-30/stack_exp_all_2026-08-30.csv',
+    'exp_aligned': f'{SUB}/2026-08-30/stack_exp_aligned_2026-08-30.csv',
+    'exp_cat': f'{SUB}/2026-08-30/exp_cat_2026-08-30.csv',
+    'w66_prod': f'{SUB}/2026-08-29/blend_gbdt_origfeat_nn_featfull_w66_2026-08-29.csv',
+    'stack_logit_lr': f'{SUB}/2026-08-30/stack_logit_lr_2026-08-30.csv',
+    'stack_nnls': f'{SUB}/2026-08-30/stack_nnls_2026-08-30.csv',
+    'extra_lr_raw9': f'{SUB}/2026-08-30/stack_extra_lr_raw9_2026-08-30.csv',
 }
 OOF = {
     'exp_meta6': 0.97004, 'exp_xgb': 0.97003, 'exp_ax': 0.97002, 'exp_all': 0.96999,
@@ -41,7 +44,7 @@ print('Spearman korrelasyon (test preds):')
 print('   ' + ' '.join(f'{x[:10]:>11}' for x in names))
 for i, a in enumerate(names):
     print(f'{a[:11]:>11} ' + ' '.join(f'{R[i,j]:11.3f}' for j in range(len(names))))
-np.save('nn_cache/final10_corr.npy', R)
+np.save(f'{NN_CACHE}/final10_corr.npy', R)
 pd.DataFrame({'sub': names, 'path': [SUBS[k] for k in names], 'oof_auc': [OOF[k] for k in names], 'lb': [LB.get(k, np.nan) for k in names]}
-            ).to_csv('nn_cache/final10_table.csv', index=False)
+            ).to_csv(f'{NN_CACHE}/final10_table.csv', index=False)
 print('kaydedildi: nn_cache/final10_table.csv + final10_corr.npy', flush=True)

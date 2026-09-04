@@ -6,7 +6,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 RUN_NAME = 'lgbm_raw_te_v2'
 t0 = time.time()
@@ -54,7 +56,7 @@ Xc = pd.concat([raw_tr, enc_tr.add_prefix('te_')], axis=1)
 Xc_test = pd.concat([raw_te, enc_te.add_prefix('te_')], axis=1)
 print(f'Birleşik özellik sayısı: {Xc.shape[1]} | encoding: {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm_raw_te.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm_raw_te.json') as f:
     tuned = json.load(f)
 params = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED, **tuned)
 
@@ -74,7 +76,7 @@ print(f'\nCV OOF AUC (raw+TE, v2 params): {cv_auc:.5f}')
 print(f'Karşılaştırma -> eski params (raw-feature-tuned): 0.96726 | yeni params (raw+TE-tuned): {cv_auc:.5f}')
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': test_pred})
-sub_path = f'sub/{RUN_NAME}_2026-08-12.csv'
+sub_path = f'{SUB}/{RUN_NAME}_2026-08-12.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')
 print(f'Elapsed: {time.time()-t0:.0f}s')

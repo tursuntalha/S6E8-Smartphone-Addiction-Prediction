@@ -18,14 +18,16 @@ from sklearn.neural_network import MLPClassifier
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, get_transforms, save_submission, CACHE
 
-CACHE = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE as CACHE, SUB
 VARIANT = sys.argv[1]
 CKPT = f'{CACHE}/stack_checkpoint.json'
 
 names, O, T, y, n = load_all()
 ntest = T.shape[0]
 LO, LT, RO, RT, ZO, ZT = get_transforms(names, O, T, n, ntest)
-test_id = pd.read_csv('data/test.csv')['id'].values
+test_id = pd.read_csv(f'{DATA}/test.csv')['id'].values
 skf = StratifiedKFold(5, shuffle=True, random_state=42)
 folds = list(skf.split(np.zeros(n), y))
 
@@ -154,7 +156,7 @@ if os.path.exists(CKPT):
         ck = json.load(f)
 ck[VARIANT] = {'oof_auc': auc, 'oof': f'{CACHE}/stacko_{VARIANT}.npy',
                'test': f'{CACHE}/stackt_{VARIANT}.npy',
-               'sub': f'sub/2026-08-30/stack_{VARIANT}_2026-08-30.csv',
+               'sub': f'{SUB}/2026-08-30/stack_{VARIANT}_2026-08-30.csv',
                'seconds': int(time.time() - t0)}
 with open(CKPT, 'w') as f:
     json.dump(ck, f, indent=2)

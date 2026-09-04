@@ -29,8 +29,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.neighbors import KernelDensity
 
 SEED = 42
-DATA = 'data'
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE as CACHE_DIR
 os.makedirs(CACHE_DIR, exist_ok=True)
 t0 = time.time()
 

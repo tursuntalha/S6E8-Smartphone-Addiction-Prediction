@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader
 
 from nn_common import LookupTransformerNet, LookupDataset, train_model, device
 
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR
 data = np.load(f'{CACHE_DIR}/prepped.npz')
 
 tr_idx, va_idx = data['tr_idx'], data['va_idx']

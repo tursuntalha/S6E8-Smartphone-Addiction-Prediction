@@ -4,7 +4,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values
 prior = y.mean()

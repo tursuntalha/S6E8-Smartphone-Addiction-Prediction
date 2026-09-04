@@ -16,7 +16,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -106,7 +108,7 @@ X_test = pd.concat([raw_te, enc_te.add_prefix('te_')], axis=1)
 feat_cols = X.columns.tolist()
 print(f'K1 feature set hazir: {X.shape[1]} ozellik, {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
 params_lgb = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1,
                   random_state=SEED, **tuned_lgb)

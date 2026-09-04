@@ -19,7 +19,9 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from itertools import combinations
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 t0 = time.time()
@@ -108,11 +110,11 @@ X = pd.concat([raw_tr, enc_tr.add_prefix('te_')], axis=1)
 X_test = pd.concat([raw_te, enc_te.add_prefix('te_')], axis=1)
 print(f'K1 feature set hazir: {X.shape[1]} ozellik, {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned_lgb = json.load(f)
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
@@ -209,7 +211,7 @@ print(f'[polinom-etkilesimli 4-model meta-stack (LGB)] OOF AUC = {meta_auc:.5f} 
 print(f'  (referans: tek-seed 3-model blend 0.96849, cok-seedli 3-model blend 0.96874)')
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': pred_meta})
-sub_path = 'sub/lgbm_metastack_4model_k1_2026-08-14.csv'
+sub_path = f'{SUB}/lgbm_metastack_4model_k1_2026-08-14.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')
 print(f'\nToplam sure: {time.time()-t0:.0f}s')

@@ -21,7 +21,9 @@ from torch.utils.data import DataLoader
 from nn_common import LookupTransformerNet, LookupDataset, train_model, device
 
 SEED = 42
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR
 N_TRIALS = 20
 SEARCH_EPOCHS = 18
 SEARCH_PATIENCE = 4

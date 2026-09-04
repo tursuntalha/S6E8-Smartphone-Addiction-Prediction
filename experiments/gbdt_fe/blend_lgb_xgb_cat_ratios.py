@@ -9,7 +9,9 @@ from scipy.stats import rankdata
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 t0 = time.time()
 
@@ -69,7 +71,7 @@ print(f'Features: {X.shape[1]} (28 baseline + {len(ratio_cols)} ratio) | enc: {t
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 fold_idx = list(skf.split(X, y))
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 
 # ---------- LightGBM (CPU) ----------
@@ -85,7 +87,7 @@ for tr, va in fold_idx:
 print(f'LightGBM OOF AUC: {roc_auc_score(y, oof_lgb):.5f} ({time.time()-t0:.0f}s)')
 
 # ---------- XGBoost (GPU) ----------
-with open('sub/best_params_xgb.json') as f:
+with open(f'{CONFIGS}/best_params_xgb.json') as f:
     tuned_xgb = json.load(f)
 oof_xgb = np.zeros(len(X)); pred_xgb = np.zeros(len(X_test))
 params_xgb = dict(objective='binary:logistic', eval_metric='auc', n_estimators=5000,
@@ -98,7 +100,7 @@ for tr, va in fold_idx:
 print(f'XGBoost OOF AUC: {roc_auc_score(y, oof_xgb):.5f} ({time.time()-t0:.0f}s)')
 
 # ---------- CatBoost (GPU) ----------
-with open('sub/best_params_cat.json') as f:
+with open(f'{CONFIGS}/best_params_cat.json') as f:
     tuned_cat = json.load(f)
 oof_cat = np.zeros(len(X)); pred_cat = np.zeros(len(X_test))
 for tr, va in fold_idx:
@@ -118,7 +120,7 @@ print(f'\nBlend (rank-average) OOF AUC: {blend_auc:.5f}')
 print(f'Karşılaştırma -> v3 blend (ratio yok, LB 0.96862): 0.96762 | v4 blend (+ratio): {blend_auc:.5f}')
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': pred_rank / max(pred_rank)})
-sub_path = 'sub/lgbm_xgb_cat_rankblend_v4_ratios_2026-08-12.csv'
+sub_path = f'{SUB}/lgbm_xgb_cat_rankblend_v4_ratios_2026-08-12.csv'
 sub.to_csv(sub_path, index=False)
 print(f'Saved: {sub_path}')
 print(f'Elapsed: {time.time()-t0:.0f}s')

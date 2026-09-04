@@ -4,7 +4,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB
 SEED = 42
 RUN_NAME = 'lgbm_ismissing'
 
@@ -67,6 +69,6 @@ print('\nTop 10 feature importance:')
 print(imp.head(10).round(0).to_string())
 
 sub = pd.DataFrame({'id': test['id'], 'addicted_label': test_pred})
-sub_path = f'sub/{RUN_NAME}_2026-08-11.csv'
+sub_path = f'{SUB}/{RUN_NAME}_2026-08-11.csv'
 sub.to_csv(sub_path, index=False)
 print(f'\nSaved: {sub_path}')

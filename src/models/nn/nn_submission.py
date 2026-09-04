@@ -10,8 +10,10 @@ from torch.utils.data import DataLoader
 
 from nn_common import LookupTransformerNet, LookupDataset, predict_probabilities, device
 
-CACHE_DIR = 'nn_cache'
-SUB_PATH = 'sub/2026-08-19/nn_lookup_transformer_v2_2026-08-19.csv'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR, SUB
+SUB_PATH = f'{SUB}/2026-08-19/nn_lookup_transformer_v2_2026-08-19.csv'
 
 data = np.load(f'{CACHE_DIR}/prepped.npz')
 

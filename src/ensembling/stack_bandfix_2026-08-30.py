@@ -14,17 +14,20 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.special import logit, expit
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, save_submission, CACHE
 
 SMOOTH = 1e-6
-R = 'data/extra_oof/rayk/unzipped'
+R = f'{DATA}/extra_oof/rayk/unzipped'
 
-train = pd.read_csv('data/train.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values.astype(np.uint8)
 n = len(y)
-test = pd.read_csv('data/test.csv')
+test = pd.read_csv(f'{DATA}/test.csv')
 ntest = len(test)
 test_id = test['id'].values
 assert np.all(train['id'].values == np.arange(n)), 'train id==rowoid'

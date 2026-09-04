@@ -16,8 +16,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold
 
 SEED = 42
-DATA = 'data'
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE as CACHE_DIR
 os.makedirs(CACHE_DIR, exist_ok=True)
 
 train = pd.read_csv(f'{DATA}/train.csv')

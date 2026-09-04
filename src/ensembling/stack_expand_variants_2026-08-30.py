@@ -9,6 +9,9 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, save_submission, CACHE
@@ -27,7 +30,7 @@ names, O, T, y, n = load_all()
 ntest = T.shape[0]
 skf = StratifiedKFold(5, shuffle=True, random_state=42)
 folds = list(skf.split(np.zeros(n), y))
-test_id = pd.read_csv('data/test.csv')['id'].values
+test_id = pd.read_csv(f'{DATA}/test.csv')['id'].values
 
 LO = logit_ = None
 from scipy.special import logit

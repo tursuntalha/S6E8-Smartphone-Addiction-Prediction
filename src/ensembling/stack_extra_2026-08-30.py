@@ -14,6 +14,9 @@ from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.stats import rankdata
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, get_transforms, save_submission, CACHE
@@ -21,8 +24,8 @@ from stack_data_2026_08_30 import load_all, get_transforms, save_submission, CAC
 names, O, T, y, n = load_all()
 ntest = T.shape[0]
 LO, LT, RO, RT, ZO, ZT = get_transforms(names, O, T, n, ntest)
-test_id = pd.read_csv('data/test.csv')['id'].values
-train = pd.read_csv('data/train.csv')
+test_id = pd.read_csv(f'{DATA}/test.csv')['id'].values
+train = pd.read_csv(f'{DATA}/train.csv')
 skf = StratifiedKFold(5, shuffle=True, random_state=42)
 folds = list(skf.split(np.zeros(n), y))
 
@@ -30,7 +33,7 @@ RAW9 = ['age', 'daily_screen_time_hours', 'social_media_hours', 'gaming_hours',
         'work_study_hours', 'sleep_hours', 'notifications_per_day',
         'app_opens_per_day', 'weekend_screen_time']
 raw_tr = train[RAW9].astype(float).values
-raw_te = pd.read_csv('data/test.csv')[RAW9].astype(float).values
+raw_te = pd.read_csv(f'{DATA}/test.csv')[RAW9].astype(float).values
 imp_tr = np.isnan(raw_tr).sum(axis=1)
 imp_te = np.isnan(raw_te).sum(axis=1)
 raw_tr = np.nan_to_num(raw_tr, nan=-999.0)
@@ -59,7 +62,7 @@ def finish(name, oof, pred):
     save_submission(f'stack_{name}', test_id, pred)
     with open(f'{CACHE}/stack_checkpoint.json') as f:
         ck = json.load(f)
-    ck[name] = {'oof_auc': auc, 'sub': f'sub/2026-08-30/stack_{name}_2026-08-30.csv'}
+    ck[name] = {'oof_auc': auc, 'sub': f'{SUB}/2026-08-30/stack_{name}_2026-08-30.csv'}
     with open(f'{CACHE}/stack_checkpoint.json', 'w') as f:
         json.dump(ck, f, indent=2)
     return auc

@@ -6,17 +6,20 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from scipy.special import logit
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA
 
 sys.path.insert(0, os.path.dirname(__file__))
 from stack_data_2026_08_30 import load_all, save_submission, CACHE
 
 SMOOTH = 1e-6
-train = pd.read_csv('data/train.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values.astype(np.uint8)
 n = len(y)
 skf = StratifiedKFold(5, shuffle=True, random_state=42)
 folds = list(skf.split(np.zeros(n), y))
-test_id = pd.read_csv('data/test.csv')['id'].values
+test_id = pd.read_csv(f'{DATA}/test.csv')['id'].values
 
 import importlib.util
 _spec = importlib.util.spec_from_file_location('se', os.path.join(os.path.dirname(__file__), 'stack_expand_2026-08-30.py'))
@@ -31,8 +34,8 @@ for gn, gO, gT in [_se.load_group_dariush(), _se.load_group_rayk(), _se.load_gro
 
 # mkn 3
 for d, tag in [('s6e8-xgb-oof', 'xgb'), ('s6e8-lgb-dart-oof', 'lgb'), ('s6e8-cat-mlp-oof', 'cat')]:
-    o = np.load(f'data/extra_oof/mkn/u/{d}/oof_{tag}_v3.npy')
-    t = np.load(f'data/extra_oof/mkn/u/{d}/test_{tag}_v3.npy')
+    o = np.load(f'{DATA}/extra_oof/mkn/u/{d}/oof_{tag}_v3.npy')
+    t = np.load(f'{DATA}/extra_oof/mkn/u/{d}/test_{tag}_v3.npy')
     LO = np.hstack([LO, logit(np.clip(o, SMOOTH, 1 - SMOOTH))[:, None]])
     LT = np.hstack([LT, logit(np.clip(t, SMOOTH, 1 - SMOOTH))[:, None]])
 print(f'[matris] {LO.shape[1]} uye (aligned+paiky-mkn)', flush=True)

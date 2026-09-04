@@ -6,7 +6,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 SMOOTH = 3.0
 JOINT_SMOOTH = 10.0  # hucre basina ort. ~15 satir (notif x opens), daha guclu smoothing
@@ -87,7 +89,7 @@ for a, b in JOINT_PAIRS:
     joint_cols.append(name)
 print(f'Joint TE encoding hazir ({joint_cols}): {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 params = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED, **tuned)
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
@@ -128,7 +130,7 @@ def run(name, use_joint):
         imp = pd.Series(model.feature_importances_, index=Xc.columns)
         print(f'  joint TE importance: {imp[joint_cols].sort_values(ascending=False).to_dict()}')
     sub = pd.DataFrame({'id': test['id'], 'addicted_label': test_pred})
-    sub_path = f'sub/lgbm_fe_{name}_2026-08-13.csv'
+    sub_path = f'{SUB}/lgbm_fe_{name}_2026-08-13.csv'
     sub.to_csv(sub_path, index=False)
     print(f'  Saved: {sub_path}\n')
 

@@ -14,11 +14,13 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
 t0 = time.time()
-CACHE = 'nn_cache'
-L = 'data/oof_library/oof'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, NN_CACHE as CACHE
+L = f'{DATA}/oof_library/oof'
 
 # ---- yukle etiketler ----
-train = pd.read_csv('data/train.csv')
+train = pd.read_csv(f'{DATA}/train.csv')
 y = train['addicted_label'].values
 print(f'train yuklendi: {len(y)} satir, prior={y.mean():.4f}')
 

@@ -6,7 +6,9 @@ import lightgbm as lgb
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 
-DATA = 'data'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import DATA, SUB, CONFIGS
 SEED = 42
 t0 = time.time()
 
@@ -79,7 +81,7 @@ for c in all_cats:
     enc_tr[c] = oof_enc
 print(f'TE encoding hazir: {time.time()-t0:.0f}s')
 
-with open('sub/best_params_lgbm.json') as f:
+with open(f'{CONFIGS}/best_params_lgbm.json') as f:
     tuned = json.load(f)
 params = dict(objective='binary', metric='auc', n_estimators=5000, verbosity=-1, random_state=SEED, **tuned)
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
@@ -113,7 +115,7 @@ for cat_name, extra_cols in CATEGORIES.items():
     print(f'  yeni özellik importance: {imp[extra_cols].sort_values(ascending=False).to_dict()}')
 
     sub = pd.DataFrame({'id': test['id'], 'addicted_label': test_pred})
-    sub_path = f'sub/lgbm_fe_{cat_name}_2026-08-12.csv'
+    sub_path = f'{SUB}/lgbm_fe_{cat_name}_2026-08-12.csv'
     sub.to_csv(sub_path, index=False)
     print(f'  Saved: {sub_path}\n')
 

@@ -19,7 +19,9 @@ from torch.utils.data import DataLoader
 from nn_common import LookupTransformerNet, LookupDataset, train_model, device
 
 SEED = 42
-CACHE_DIR = 'nn_cache'
+import sys, os
+sys.path.insert(0, os.getcwd())
+from config import NN_CACHE as CACHE_DIR
 LABEL_SMOOTHING = 0.0
 
 np.random.seed(SEED)
