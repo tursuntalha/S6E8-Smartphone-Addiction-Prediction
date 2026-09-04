@@ -16,8 +16,8 @@ section) to actually run.
 - **`03_full_pipeline.ipynb`** — a complete, self-contained run of the GBDT side of the
   pipeline: ORIG-CDF + derived features → imputation → multi-seed LightGBM/XGBoost/
   CatBoost training → rank-average blend → submission file. This is the closest thing
-  to a single "run everything" notebook (the neural network and the final
-  community-OOF stack are separate, in `src/models/nn/` and `src/ensembling/`).
+  to a single "run everything" notebook (the neural network is `src/model_nn.py`, run
+  via `src/main.py`; the further community-OOF stack is `experiments/stacking/`).
 - **`04_ensembling.ipynb`** — combining already-trained model outputs: rank averaging,
   OOF-weight search, and a logistic-regression stack. Trains two small, deliberately
   different models on the spot (LightGBM + Logistic Regression) so the notebook is

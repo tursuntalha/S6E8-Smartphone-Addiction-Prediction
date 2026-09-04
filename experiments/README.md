@@ -92,15 +92,15 @@ result came back. `src/main.py` reproduces the confirmed-best step before it
 - **`lgbm_xgb_cat_decimallattice_2026-08-19.py`** (category D) and
   **`lgbm_xgb_cat_imputeaugment_2026-08-19.py`** (category B) — tested individually,
   each was noise-level in CV alone. **Combined**, they cleared the threshold
-  (CV +0.00036) and were confirmed on the leaderboard (+0.00015) — that combined
-  version lives in `src/models/gbdt/lgbm_xgb_cat_ABD_combined_2026-08-19.py`. Kept here
-  as the original isolated (negative) tests.
+  (CV +0.00036) and were confirmed on the leaderboard (+0.00015) — both are permanently
+  part of `src/features.py`'s feature set now. Kept here as the original isolated
+  (negative) tests.
 - **`lgbm_xgb_cat_freqenc_2026-08-19.py`** — frequency encoding. No measurable gain
   over the existing target encoding.
 - **`lgbm_fe_categories.py`**, **`lgbm_fe_categories_v2.py`** — tested four candidate
-  ratio/derived feature categories (A/B/C/D) one at a time. A and B were kept (folded
-  directly into `src/models/gbdt/blend_lgb_xgb_cat_AB.py`); C ("awake-hours budget")
-  and D ("inverse-direction ratio", in this earlier form) were rejected at the time.
+  ratio/derived feature categories (A/B/C/D) one at a time. A and B were kept (now part
+  of `src/features.py`'s feature set); C ("awake-hours budget") and D ("inverse-direction
+  ratio", in this earlier form) were rejected at the time.
 - **`lgbm_fe_bundle_check.py`** — sanity-checked candidate feature bundles together
   before promoting any of them individually.
 - **`lgbm_fe_cleanresid.py`**, **`lgbm_fe_constraintimpute.py`**,
@@ -131,7 +131,7 @@ result came back. `src/main.py` reproduces the confirmed-best step before it
 - **`lgbm_categorical.py`** — an early native-categorical attempt on the LightGBM
   side only. Superseded once target encoding proved stronger.
 - **`blend_lgb_xgb_cat_ratios.py`** — an early ratio-feature blend variant, superseded
-  by `src/models/gbdt/blend_lgb_xgb_cat_AB.py`.
+  by the feature set now in `src/features.py`.
 - **`blend_featuresubset_diversity.py`** — blended models trained on different feature
   subsets for diversity. No gain over the standard full-feature blend.
 
@@ -140,7 +140,7 @@ result came back. `src/main.py` reproduces the confirmed-best step before it
 - **`nn_experiment_features.py`** — the original test expanding the NN's inputs from
   9+3 raw columns to +8 derived ratio/diff features. **+0.00193 solo AUC**, the one
   clear net win among the isolated NN experiments — merged directly into production
-  (`src/features/nn_data_prep.py`, `src/models/nn/nn_model.py`). Kept here as the
+  (`src/features.py`'s `build_nn_arrays`, `src/model_nn.py`). Kept here as the
   historical isolated test.
 - **`nn_experiment_capacity.py`** — larger Transformer (d_token 64→128, 2→3 layers) +
   LR warmup. **-0.00085**, didn't converge in the 25-epoch budget.
@@ -155,8 +155,8 @@ result came back. `src/main.py` reproduces the confirmed-best step before it
   the "NN hyperparameter tuning" direction entirely.
 - **`nn_experiment_missingaug_2026-08-21.py`**, **`nn_experiment_missingaug_round2_
   2026-08-21.py`** — mask-probability sweep for missingness augmentation (0.05→0.50).
-  The winning setting (mask_prob=0.40) was promoted directly into `src/features/
-  nn_common.py` and the production training scripts; these are the sweep scripts.
+  The winning setting (mask_prob=0.40) is now the default in `src/model_nn.py`'s
+  `train_nn_kfold`; these are the sweep scripts.
 - **`nn_experiment_missingaug_grouped_2026-08-21.py`**,
   **`nn_train_kfold_missingaug_grouped_2026-08-21.py`**,
   **`blend_gbdt_nn_missingaug_grouped_2026-08-21.py`** — a cascaded (pandas-NaN-
@@ -166,8 +166,8 @@ result came back. `src/main.py` reproduces the confirmed-best step before it
   0.96717 for the cell-based production version); blend OOF also worse (0.96902 vs.
   0.96909).
 - **`nn_data_prep_kfold.py`** — the pre-"featfull" NN feature-prep script (8 derived
-  columns). Superseded by `src/features/nn_data_prep_kfold_featfull_2026-08-29.py`
-  (62 derived columns, +0.00074 solo NN AUC, +0.00010 LB).
+  columns). Superseded by the 62-derived-column version now in `src/features.py`'s
+  `build_nn_arrays` (+0.00074 solo NN AUC, +0.00010 LB over the 8-column version).
 
 ## `resnet/` — attention-free tabular ResNet (architecture diversity)
 
