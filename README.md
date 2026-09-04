@@ -1,7 +1,14 @@
 # Predicting Smartphone Addiction — Kaggle Playground Series S6E8
 
+Kaggle competition: [Playground Series S6E8 — Predicting Smartphone Addiction](https://www.kaggle.com/competitions/playground-series-s6e8)
+
 Binary classification (`addicted_label`, metric: **AUC**) on a synthetically generated
-dataset of ~1M rows. Best confirmed public leaderboard score: **AUC = 0.97035**.
+dataset of ~1M rows.
+
+| Leaderboard | AUC |
+|---|---|
+| Public | 0.97035 |
+| Private | 0.97082 |
 
 ## Approach
 
